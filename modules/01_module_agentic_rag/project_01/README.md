@@ -1,6 +1,6 @@
 # LLM AI Module 1 Assignment: Agentic RAG
 
-The purose of this assignment is a build a RAG system from scratch and then make it agentic.
+The purpose of this assignment is a build a RAG system from scratch and then make it agentic.
 
 Instead of the course FAQ, our knowledge base is the course lessons themselves.
 
@@ -28,6 +28,8 @@ There are seven modules:
 Each lesson page is a single markdown file. These pages are exactly what you read as you go through the course.
 
 The goal is to fetch this data from GitHub and use it as the knowledge base for our RAG system.
+
+All python code references can be found here: [project_01_agentic_rag.ipynb](project_01_agentic_rag.ipynb)
 
 ## Setup
 To prepare the environment:
@@ -189,3 +191,58 @@ How many times did the agent call search?
 > Answer: 4 \
 > Note: With local AI model qwen3.5-9b, the search tool was called 3 times.
 
+Python code reference:
+```python
+from toyaikit.llm import OpenAIClient
+from toyaikit.tools import Tools
+from toyaikit.chat import IPythonChatInterface
+from toyaikit.chat.runners import OpenAIResponsesRunner, DisplayingRunnerCallback
+
+# Creating a function that will write our search tool schema automatically
+def search(query: str) -> dict[str, str]:
+    """
+    Search the FAQ database for entries matching the given query.
+    """
+    return index.search(
+        query,
+        num_results=5,
+    )
+
+# registering the search tool
+agent_tools = Tools()
+agent_tools.add_tool(search)
+
+
+openai_client = OpenAI(
+    api_key=os.getenv("API_KEY"),
+    base_url=os.getenv("HOST")
+)
+
+model = "qwen/qwen3.5-9b"
+
+# Developer Prompt - we define how we want the LLM model to behave
+instructions = """
+You're a course teaching assistant. 
+Answer the student's question using the search tool. 
+Make multiple searches with different keywords before answering.
+""".strip()
+
+# Creating the chat interface and a callback, then build the runner
+chat_interface = IPythonChatInterface()
+callback = DisplayingRunnerCallback(chat_interface)
+
+
+runner = OpenAIResponsesRunner(
+    tools=agent_tools,
+    developer_prompt=instructions,
+    chat_interface=chat_interface,
+    llm_client=OpenAIClient(model=model, client=openai_client)
+)
+
+question = "How does the agentic loop work, and how is it different from plain RAG?"
+
+result = runner.loop(
+    prompt=question,
+    callback=callback,
+)
+```
