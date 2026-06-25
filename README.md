@@ -42,7 +42,7 @@ I am building these projects using a modern AI stack focused on the **LLM & Agen
 
 This repository contains the code artifacts and documentation for each stage of the course:
 
-├── 01-Agentic-RAG/  # Module 1: What are LLMs, RAG basics, simple FAQ pipelines, keyword search \
+├── [01-Agentic-RAG](./modules/01_module_agentic_rag/project_01/README.md)/  # Module 1: What are LLMs, RAG basics, simple FAQ pipelines, keyword search \
 ├── 02-Vector-Search/   # Module 2: Vector embeddings, similarity search, vector databases \
 ├── 03-Prompt-Engineering/     # Module 3: Prompt design patterns, few-shot, CoT, etc. \
 ├── 04-Agents/                   # Module 4: AI agents, tool use, function calling \
