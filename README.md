@@ -1,4 +1,4 @@
-# 🧠 LLM Zoomcamp Portfolio & Course Capstone
+# 🧠 LLM Zoomcamp Course & Portfolio Capstone
 
 > Building production-ready AI assistants with Retrieval-Augmented Generation (RAG), agents, vector search, and more.
 
