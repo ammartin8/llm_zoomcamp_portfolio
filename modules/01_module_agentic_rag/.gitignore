@@ -222,6 +222,7 @@ pip-selfcheck.json
 *.vcf
 *.xml
 
+
 ### Database ###
 *.accdb
 *.db
@@ -231,3 +232,7 @@ pip-selfcheck.json
 *.sqlite3
 *.db-shm
 *.db-wal
+
+
+### Models ####
+models/
