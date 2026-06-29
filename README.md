@@ -84,7 +84,7 @@ A sincere thank you to Alexey Grigorev and the LLM Zoomcamp Instructors at [Data
 
 ## 📝 Notes & Updates
 
-> **Currently in: Module 1 - Agentic RAG**
+> **Currently in: Module 2 - Vector Search**
 > 
 > I am actively working through the course and will update this repository with new modules, projects, and learnings as I complete each section. Stay tuned for progress updates and final capstone project!
 
