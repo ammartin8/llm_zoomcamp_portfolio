@@ -37,15 +37,8 @@ v1[0]
 ## Q2. Cosine similarity
 Preparation: I pulled the lesson pages from the course repository referencing the `8c1834d` using the following code:
 ```python
-from gitsource import GithubRepositoryDataReader
-
-reader = GithubRepositoryDataReader(
-    repo_owner="DataTalksClub",
-    repo_name="llm-zoomcamp",
-    commit_id="8c1834d",
-    allowed_extensions={"md"},
-    filename_filter=lambda path: "/lessons/" in path,
-)
+# pulling data from source
+documents = load_documents()
 
 documents = [file.parse() for file in reader.read()]
 ```
@@ -80,32 +73,16 @@ Which file does the highest-scoring chunk belong to (its filename)?
 
 Python snippet:
 ```python
-
 from gitsource import chunk_documents
 chunks = chunk_documents(documents, size=2000, step=1000)
 
+X1 = embed.encode_batch([c["content"] for c in chunks])
 
-texts = [chunk['content'] for chunk in chunks]
-chunk_metadata = [{'filename': chunk.get('filename', 'unknown'), 'content': chunk['content']} for chunk in chunks]
-
-from tqdm.auto import tqdm
-import numpy as np
-
-batch_size = 50
-X = []
-
-for i in tqdm(range(0, len(texts), batch_size)):
-    batch = texts[i:i + batch_size]
-    batch_vectors = embed.encode_batch(batch)
-    X.extend(batch_vectors)
-
-X = np.array(X)
-
-scores = X.dot(v1)
+scores = X1.dot(v1)
 
 idx = np.argmax(scores)
 
-print(chunk_metadata[idx])
+print(chunks[idx])
 ```
 
 
@@ -121,24 +98,17 @@ Which file is the filename of the first result?
 
 Python snippet:
 ```python
-# embed query
+X1 = embed.encode_batch([c["content"] for c in chunks])
+
 q2 = "What metric do we use to evaluate a search engine?"
 v2 = embed.encode(q2)
-print(f"length of v2: {len(v2)} \n shape of v2: {v2.shape} \n, output of v2: {v2}")
-
-
-scores = X.dot(v2)
-idx = np.argmax(scores)
-
 
 from minsearch import VectorSearch
 
-vindex = VectorSearch()
-vindex.fit(X, texts)
+vector_search = VectorSearch(keyword_fields=['content'])
+vector_search.fit(X1, chunks)
 
-for item in chunk_metadata:
-    if item['content'] == results[0]:
-        print(item['filename'])
+results = vector_search.search(v2, num_results=5)
 ```
 
 ## Q5. Text search vs vector search
@@ -175,14 +145,13 @@ print(f"length: {len(v3)} \n shape: {v3.shape}, \n output: {v3}")
 
 from minsearch import VectorSearch
 
-vindex = VectorSearch()
-vindex.fit(X, texts)
+vector_search = VectorSearch(keyword_fields=['content'])
+vector_search.fit(X1, chunks)
 
-vresults = vindex.search(v3, num_results=5)
+vresults = vector_search.search(v3, num_results=5)
 
-for item in chunk_metadata:
-    if item['content'] in vresults:
-        print(f"FILENAME: {item['filename']}")
+for result in vresults:
+    print(result['filename'])
 ```
 
 ## Q6. Hybrid search
@@ -192,3 +161,39 @@ results = rrf([vector_results, text_results])
 
 Which file is ranked first after RRF?
 
+> Answer: 01-agentic-rag/lessons/13-function-calling.md
+
+Python snippet:
+```python
+def rrf(result_lists, k=60, num_results=5):
+    scores = {}
+    docs = {}
+
+    for results in result_lists:
+        for rank, doc in enumerate(results):
+            key = (doc["filename"], doc["start"])
+            scores[key] = scores.get(key, 0) + 1 / (k + rank)
+            docs[key] = doc
+
+    ranked = sorted(scores, key=scores.get, reverse=True)
+    return [docs[key] for key in ranked[:num_results]]
+
+q4 = "How do I give the model access to tools?"
+
+# keyword text search
+kresults = kindex.search(q4, num_results=5)
+for item in kresults:
+    print(item['filename'])
+
+# vector search
+v4 = embed.encode(q4)
+
+from minsearch import VectorSearch
+
+vector_search = VectorSearch(keyword_fields=['content'])
+vector_search.fit(X1, chunks)
+
+vresults = vector_search.search(v4, num_results=5)
+
+results = rrf([vresults, kresults])
+```
