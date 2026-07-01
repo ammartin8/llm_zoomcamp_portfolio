@@ -310,6 +310,20 @@ def rrf(result_lists, k=60, num_results=5):
 
 ---
 
+
+## 💻️ Code Availability
+
+All source code for Module 2 is available in the GitHub repository under the `02_vector_search/` directory. Key files include:
+
+- **`project_02_vector_search.ipynb`** – Full implementation walkthrough with inline code cells and execution outputs demonstrating hybrid search, vector embedding, and RRF fusion logic
+- **`embedder.py`** – ONNX-based embedding wrapper supporting batch encoding for chunks
+- **`download.py`** – Model retrieval script that fetches `Xenova/all-MiniLM-L6-v2` from HuggingFace
+- **`project_ingest.py`** – Document ingestion, chunking logic using sliding window (2000/1000 chars), and index construction for both vector and keyword search
+
+The `models/Xenova/` directory contains the downloaded ONNX model files (`model.onnx`, `tokenizer.json`) needed for inference. A `uv.lock` file ensures reproducible dependency pinning across environments.
+
+---
+
 ## ✅ Conclusion
 
 This vector search implementation demonstrates that **semantic retrieval is achievable with lightweight tools**. By combining ONNX-based embeddings with minsearch and fusing results through RRF, I've built a retrieval system that's both precise and flexible.
