@@ -55,23 +55,6 @@ This lean setup demonstrates that vector search doesn't require heavy infrastruc
 
 ---
 
-### Environment Setup
-
-```bash
-# Clean slate project initialization
-uv init --no-workspace
-
-# Core dependencies for vector operations
-uv add onnxruntime tokenizers numpy tqdm minsearch gitsource
-
-# Development dependencies  
-uv add --dev huggingface-hub jupyter
-```
-
-This lean setup demonstrates that vector search doesn't require heavy infrastructure—ONNX Runtime provides CPU-based inference that's accessible even without GPU resources.
-
----
-
 ## 📦 Data Preparation Pipeline
 
 Before I could run any embedding or search operations, I needed to prepare the raw lesson content from the course repository. Here's how I structured the data pipeline:
