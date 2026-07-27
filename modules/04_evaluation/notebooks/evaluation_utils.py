@@ -20,11 +20,36 @@ def calc_price(usage):
     }
 
 
+def calc_price_chat_completions(usage):
+    input_price_per_million = 0.75
+    output_price_per_million = 4.50
+
+    input_cost = (usage['prompt_tokens'] / 1_000_000) * input_price_per_million
+    output_cost = (usage['completion_tokens'] / 1_000_000) * output_price_per_million
+    total_cost = input_cost + output_cost
+
+    return {
+        "input_cost": input_cost,
+        "output_cost": output_cost,
+        "total_cost": total_cost,
+    }
+
+
 def calc_total_price(usages):
     total_cost = 0.0
 
     for usage in usages:
         cost = calc_price(usage)
+        total_cost = total_cost + cost["total_cost"]
+
+    return total_cost
+
+
+def calc_total_price_chat_completions(usages):
+    total_cost = 0.0
+
+    for usage in usages:
+        cost = calc_price_chat_completions(usage)
         total_cost = total_cost + cost["total_cost"]
 
     return total_cost
@@ -62,7 +87,7 @@ def llm_structured_chat_completions(client, instructions, user_prompt, output_ty
        "total_tokens": response.usage.total_tokens
     }
 
-    return response.choices[0].message.parsed, usage_dict
+    return response.choices[0].message.parsed, response.usage
 
 
 def llm_structured_retry(
@@ -86,6 +111,30 @@ def llm_structured_retry(
             if attempt == max_retries - 1:
                 raise
             time.sleep(2 ** attempt)
+
+
+def llm_structured_retry_chat_completions(
+    client,
+    instructions,
+    user_prompt,
+    output_type,
+    model="qwen3.5-9b_coding_fast",
+    max_retries=3,
+):
+    for attempt in range(max_retries):
+        try:
+            return llm_structured_chat_completions(
+                client,
+                instructions,
+                user_prompt,
+                output_type,
+                model=model,
+            )
+        except Exception:
+            if attempt == max_retries - 1:
+                raise
+            time.sleep(2 ** attempt)
+
 
 
 class RAGWithUsage(RAGBase):
