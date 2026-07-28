@@ -195,3 +195,63 @@ def map_progress(pool, seq, f):
             results.append(result)
 
     return results
+
+
+class LMStudioRAGWithUsage(RAGBase):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.usages = []
+        self.last_usage = None
+
+    def reset_usage(self):
+        self.usages = []
+        self.last_usage = None
+
+    def search(self, query, num_results=5):
+        boost_dict = {"question": 1.0, "answer": 2.0, "section": 0.1}
+        filter_dict = {"course": self.course}
+
+        return self.index.search(
+            query,
+            num_results=num_results,
+            boost_dict=boost_dict,
+            filter_dict=filter_dict
+        )
+
+    def llm(self, prompt):
+        input_messages = [
+            {'role': 'developer', 'content': self.instructions},
+            {'role': 'user', 'content': prompt}
+        ]
+
+        response = self.llm_client.chat.completions.create(
+            model=self.model,
+            messages=input_messages
+        )
+
+        self.last_usage = response.usage
+        self.usages.append(response.usage)
+
+        return response.choices[0].message.content
+
+    def total_cost(self):
+        return calc_total_price(self.usages)
+
+
+def map_progress(pool, seq, f):
+    results = []
+
+    with tqdm(total=len(seq)) as progress:
+        futures = []
+
+        for el in seq:
+            future = pool.submit(f, el)
+            future.add_done_callback(lambda p: progress.update())
+            futures.append(future)
+
+        for future in futures:
+            result = future.result()
+            results.append(result)
+
+    return results
